@@ -83,7 +83,7 @@ d3.csv("totals_sorted.csv").then(
     //  .range([0,dimensions.boundedWidth]).padding(0.2)
 
     var xDomain = d3.extent(dates, d => d.date)
-    console.log("xDomain", xDomain)
+    //console.log("xDomain", xDomain)
 
     var xScale = d3.scaleTime()
       .domain(xDomain)
@@ -136,10 +136,10 @@ d3.csv("totals_sorted.csv").then(
     //AL = red
     var AL = bounds.selectAll(".line")
       .append("g")
-      .attr("class", "line")
       .data([dataset])
       .enter()
       .append("path")
+      .attr("class", "line")//added this
       .attr("fill", "none")
       .attr("stroke", ALColor)
       .attr("stroke-width", 2)
@@ -238,174 +238,183 @@ d3.csv("totals_sorted.csv").then(
       .attr("text-align","center")
     //
 
+    function update() {
+      console.log("updating yScale")
+      nl_x = d3.map(dataset, xNLAccessor)
+      nl_max_x = d3.max(nl_x)
+      al_x = d3.map(dataset, xALAccessor)
+      al_max_x = d3.max(al_x)
+      max_x = Math.max(d3.max(nl_x), d3.max(al_x))
+
+      console.log("max_x", max_x)
+      yScale
+        .domain([0, max_x])
+
+      console.log("updating chart")
+      NL.transition()
+        .attr("d", d3.line()
+            .x(d => xScale(+d.Year))
+            .y(d => yScale(xNLAccessor(d))).curve(d3.curveLinear)
+        )
+        
+      var al_x = d3.map(dataset, xALAccessor)
+
+      AL.transition()
+        .attr("d", d3.line()
+            .x(d => xScale(+d.Year))
+            .y(d => yScale(xALAccessor(d))).curve(d3.curveCardinal)
+        )
+
+      changing_axis.transition()
+        .call(yAxis)
+
+      console.log("updating labels")
+      d3.select("#NLLegend") 
+        .text(NLTextLegend)
+      d3.select("#ALLegend") 
+        .text(ALTextLegend)
+    }
+
     //ON CLICK
-    //d3.select("#hrs").on("click", function() {
-    //  console.log("Hrs clicked")
-    //  xNLAccessor = d => +d.NL_hrs
-    //  xALAccessor = d => +d.AL_hrs
-    //  
-    //  NLTextLegend = "National League HRs"
-    //  ALTextLegend = "National League HRs"
+    d3.select("#hrs").on("click", function() {
+      console.log("Hrs clicked")
+      xNLAccessor = d => +d.NL_hrs
+      xALAccessor = d => +d.AL_hrs
+      
+      NLTextLegend = "National League HRs"
+      ALTextLegend = "American League HRs"
 
-    //  update()
-    //})
+      update()
+    })
 
-    //d3.select("#hits").on("click", function() {
-    //  console.log("Hits clicked")
-    //  xNLAccessor = d => +d.NL_hits
-    //  xALAccessor = d => +d.AL_hits
+    d3.select("#hits").on("click", function() {
+      console.log("Hits clicked")
+      xNLAccessor = d => +d.NL_hits
+      xALAccessor = d => +d.AL_hits
 
-    //  NLTextLegend = "National League Hits"
-    //  ALTextLegend = "American League Hits"
-    //  update()
-    //})
+      NLTextLegend = "National League Hits"
+      ALTextLegend = "American League Hits"
+      update()
+    })
 
-    //d3.select("#runs").on("click", function() {
-    //  console.log("Runs clicked")
-    //  xNLAccessor = d => +d.NL_runs
-    //  xALAccessor = d => +d.AL_runs
+    d3.select("#runs").on("click", function() {
+      console.log("Runs clicked")
+      xNLAccessor = d => +d.NL_runs
+      xALAccessor = d => +d.AL_runs
 
-    //  NLTextLegend = "National League Runs"
-    //  ALTextLegend = "American League Runs"
-    //  update()
-    //})
+      NLTextLegend = "National League Runs"
+      ALTextLegend = "American League Runs"
+      update()
+    })
 
-    //function update() {
 
-    //  console.log("updating yScale")
-    //  nl_x = d3.map(dataset, xNLAccessor)
-    //  nl_max_x = d3.max(nl_x)
-    //  al_x = d3.map(dataset, xALAccessor)
-    //  al_max_x = d3.max(al_x)
-    //  max_x = Math.max(d3.max(nl_x), d3.max(al_x))
+    // CREATE HOVER TOOLTIP WITH VERTICAL LINE
+    var lineStroke = "2px"
 
-    //  console.log("max_x", max_x)
-    //  yScale
-    //    .domain([0, max_x])
+    var tooltip = bounds.append("div")
+      .attr("id", "tooltip")
+      .style("position", "absolute")
+      .style("background-color", "#D3D3D3")
+      .style("padding", 6)
+      .style("display", "none")
 
-    //  console.log("updating chart")
-    //  NL.transition()
-    //    .attr("d", d3.line()
-    //        .x(d => xScale(+d.Year))
-    //        .y(d => yScale(xNLAccessor(d))).curve(d3.curveLinear)
-    //    )
-    //    
-    //  var al_x = d3.map(dataset, xALAccessor)
+    var mouseG = bounds.append("g")
+      .attr("class", "mouse-over-effects")
 
-    //  AL.transition()
-    //    .attr("d", d3.line()
-    //        .x(d => xScale(+d.Year))
-    //        .y(d => yScale(xALAccessor(d))).curve(d3.curveCardinal)
-    //    )
+    //Line that follows mouse
+    mouseG.append("path")
+      .attr("class", "mouse-line")
+      .style("stroke", "#A9A9A9")
+      .style("stroke-width", lineStroke)
+      .style("opacity", "0")
+    
+    var lines = document.getElementsByClassName("line")
+    var mousePerLine = mouseG.selectAll(".mouse-per-line")
+      .data([dataset])
+      .enter()
+      .append("g")
+      .attr("class", "mouse-per-line")
 
-    //  changing_axis.transition()
-    //    .call(yAxis)
+    mousePerLine.append("circle")
+      .attr("r", 4)
+      .style("stroke", "black")
+      .style("fill", "none")
+      .style("stroke-width", lineStroke)
+      .style("opacity", "0")
 
-    //  console.log("updating labels")
-    //  d3.select("#NLLegend") 
-    //    .text(NLTextLegend)
-    //  d3.select("#ALLegend") 
-    //    .text(ALTextLegend)
-    //}
+    // append a rect to catch mose movements on canvas
+    mouseG.append("svg:rect")
+      .attr("width", dimensions.boundedWidth)
+      .attr("height", dimensions.boundedHeight)
+      .attr("fill", "none")
+      .attr("pointer-events", "all")
+      .on("mouseout", function () { // on mouse out hide line, circles and text
+        d3.select(".mouse-line")
+        //console.log("hidding line")
+          .style("opacity", "0");
+        d3.selectAll(".mouse-per-line circle")
+          .style("opacity", "0");
+        d3.selectAll(".mouse-per-line text")
+          .style("opacity", "0");
+        d3.selectAll("#tooltip")
+          .style("display", "none")
+      })
+      .on("mouseover", function () { // on mouse in show line, circles and text
+        //console.log("showing line")
+        d3.select(".mouse-line")
+          .style("opacity", "1");
+        d3.selectAll(".mouse-per-line circle")
+          .style("opacity", "1");
+        d3.selectAll("#tooltip")
+          .style("display", "block")
+      })
+      .on('mousemove', function (event, d) { // update tooltip content, line, circles and text when mouse moves
+        console.log("event", event)
+        console.log("d", d)
+        //console.log("updating tooltip content")
+        //console.log("this", this) //this = current DOM element
+        var mouse = d3.pointer(event) // Returns a two-element array of numbers [x, y] representing the coordinates of the specified event relative to the specified target.
+        //console.log("mouse", mouse)
 
-    //// CREATE HOVER TOOLTIP WITH VERTICAL LINE
-    //var lineStroke = "2px"
+        d3.selectAll(".mouse-per-line")
+          .attr("transform", function (d, i) {
+            //console.log("d", d)
+            //console.log("d.Year", d.Year)
+            //console.log("i", i)
+            //console.log("mouse[0]", mouse[0])
+            //var x = xScale(mouse[0])
+            //console.log("x", x)
+            var xDate = xScale.invert(mouse[0]) // use 'invert' to get date corresponding to distance from mouse position relative to svg
+            console.log("xDate", xDate)
+            var bisect = d3.bisector(function (d) { 
+              console.log("getting here ===========>")
+              console.log("year", d.year);
+              return d.year; 
+            }).left // retrieve row index of date on parsed csv
+            //console.log("bisect?", bisect)
+            var idx = bisect(d.values, xDate);
+            var xDate = xScale.invert(mouse[0]) // use 'invert' to get date corresponding to distance from mouse position relative to svg
+            console.log("xDate", xDate)
 
-    //var tooltip = bounds.append("div")
-    //  .attr("id", "tooltip")
-    //  .style("position", "absolute")
-    //  .style("background-color", "#D3D3D3")
-    //  .style("padding", 6)
-    //  .style("display", "none")
+            //d3.select(".mouse-line")
+            //  .attr("d", function () {
+            //    var data = "M" + xScale(d.values[idx].date) + "," + (height);
+            //    data += " " + xScale(d.values[idx].date) + "," + 0;
+            //    return data;
+            //  });
+            //return "translate(" + xScale(d.values[idx].date) + "," + yScale(d.values[idx].premium) + ")";
 
-    //var mouseG = bounds.append("g")
-    //  .attr("class", "mouse-over-effects")
+          });
 
-    ////Line that follows mouse
-    //mouseG.append("path")
-    //  .attr("class", "mouse-line")
-    //  .style("stroke", "#A9A9A9")
-    //  .style("stroke-width", lineStroke)
-    //  .style("opacity", "0")
-    //
-    //var lines = document.getElementsByClassName("line")
-    //var mousePerLine = mouseG.selectAll(".mouse-per-line")
-    //  .data(dataset)
-    //  .enter()
-    //  .append("g")
-    //  .attr("class", "mouse-per-line")
+        //updateTooltipContent(mouse, res_nested)
 
-    //mousePerLine.append("circle")
-    //  .attr("r", 4)
-    //  .style("stroke", "black")
-    //  .style("fill", "none")
-    //  .style("stroke-width", lineStroke)
-    //  .style("opacity", "0")
+      }) 
+    function updateTooltipContent(mouse, res_nested) {
+      console.log("in updateToolTipContent")
+      console.log("mouse", mouse)
+      console.log("res_nested", res_nested)
+    }
 
-    //// append a rect to catch mose movements on canvas
-    //mouseG.append("svg:rect")
-    //  .attr("width", dimensions.boundedWidth)
-    //  .attr("height", dimensions.boundedHeight)
-    //  .attr("fill", "none")
-    //  .attr("pointer-events", "all")
-    //  .on("mouseout", function () { // on mouse out hide line, circles and text
-    //    d3.select(".mouse-line")
-    //      .style("opacity", "0");
-    //    d3.selectAll(".mouse-per-line circle")
-    //      .style("opacity", "0");
-    //    d3.selectAll(".mouse-per-line text")
-    //      .style("opacity", "0");
-    //    d3.selectAll("#tooltip")
-    //      .style("display", "none")
-    //  })
-    //  .on("mouseover", function () { // on mouse in show line, circles and text
-    //    d3.select(".mouse-line")
-    //      .style("opacity", "1");
-    //    d3.selectAll(".mouse-per-line circle")
-    //      .style("opacity", "1");
-    //    d3.selectAll("#tooltip")
-    //      .style("display", "block")
-    //  })
-    //  .on('mousemove', function (event, d) { // update tooltip content, line, circles and text when mouse moves
-    //    //console.log("event", event)
-    //    //console.log("d", d)
-    //    //console.log("updating tooltip content")
-    //    //console.log("this", this) //this = current DOM element
-    //    var mouse = d3.pointer(event) // Returns a two-element array of numbers [x, y] representing the coordinates of the specified event relative to the specified target.
-    //    console.log("mouse", mouse)
-
-    //    d3.selectAll(".mouse-per-line")
-    //      .attr("transform", function (d, i) {
-    //        console.log("d", d)
-    //        console.log("d.Year", d.Year)
-    //        console.log("i", i)
-    //        console.log("mouse[0]", mouse[0])
-    //        var x = xScale(mouse[0])
-    //        console.log("x", x)
-    //        var xDate = xScale.invert(mouse[0]) // use 'invert' to get date corresponding to distance from mouse position relative to svg
-    //        console.log("xDate", xDate)
-    //        var bisect = d3.bisector(function (d) { 
-    //          console.log("getting here ===========>")
-    //          console.log("year", d.year);
-    //          return d.year; 
-    //        }).left // retrieve row index of date on parsed csv
-    //        console.log("bisect?", bisect)
-    //        var idx = bisect(d.values, xDate);
-    //        var xDate = xScale.invert(mouse[0]) // use 'invert' to get date corresponding to distance from mouse position relative to svg
-
-    //        //d3.select(".mouse-line")
-    //        //  .attr("d", function () {
-    //        //    var data = "M" + xScale(d.values[idx].date) + "," + (height);
-    //        //    data += " " + xScale(d.values[idx].date) + "," + 0;
-    //        //    return data;
-    //        //  });
-    //        //return "translate(" + xScale(d.values[idx].date) + "," + yScale(d.values[idx].premium) + ")";
-
-    //      });
-
-    //    //updateTooltipContent(mouse, res_nested)
-
-    //  }) 
 
 
 
