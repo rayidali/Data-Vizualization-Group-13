@@ -349,8 +349,8 @@ d3.csv("totals_sorted.csv").then(
       .attr("fill", "none")
       .attr("pointer-events", "all")
       .on("mouseout", function () { // on mouse out hide line, circles and text
+        console.log("Mouse out... should hide line. It does not work")
         d3.select(".mouse-line")
-        console.log("hidding line")
           .style("opacity", "0");
         d3.selectAll(".mouse-per-line circle")
           .style("opacity", "0");
@@ -402,11 +402,8 @@ d3.csv("totals_sorted.csv").then(
             console.log("idx", idx)
             console.log("d[idx]", d[idx])
 
-            console.log("updating mouse-line. This is not working...")
             d3.select(".mouse-line")
               .attr("d", function () {
-                //var data = "M" + xScale(+d[idx].Year) + "," + (dimensions.boundedHeight);
-                //data += " " + xScale(+d[idx].Year) + "," + 0;
 
                 var data = "M" + xScale(dates[idx].date) + "," + (dimensions.boundedHeight);
                 data += " " + xScale(dates[idx].date) + "," + 0;
@@ -417,7 +414,7 @@ d3.csv("totals_sorted.csv").then(
           });
 
         //updateTooltipContent(mouse, res_nested)
-        updateTooltipContent(mouse)
+        //updateTooltipContent(mouse)
 
       }) 
     function updateTooltipContent(mouse) {
