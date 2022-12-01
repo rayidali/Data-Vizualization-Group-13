@@ -86,12 +86,13 @@ d3.csv("totals_sorted.csv").then(
 
     var NLHrsAccessor = d => +d.NL_hrs
     var ALHrsAccessor = d => +d.AL_hrs
-    var yHrsRange = [dimensions.boundedHeight,(2*dimensions.boundedHeight/3) - padding]
+    var yHrsRange = [dimensions.boundedHeight,(2*dimensions.boundedHeight/3) + padding]
     drawGraph(NLHrsAccessor, ALHrsAccessor, yHrsRange, ".line")
 
     var NLHitsAccessor = d => +d.NL_hits
     var ALHitsAccessor = d => +d.AL_hits
-    var yHitsRange = [(2*dimensions.boundedHeight/3) - padding,dimensions.boundedHeight/3]
+    var yHitsRange = [(2*dimensions.boundedHeight/3), dimensions.boundedHeight/3]
+    //var yHitsRange = [(2*dimensions.boundedHeight/3) - padding,dimensions.boundedHeight/3]
     drawGraph(NLHitsAccessor, ALHitsAccessor, yHitsRange, ".line2")
 
     var NLRunsAccessor = d => +d.NL_runs
@@ -101,29 +102,16 @@ d3.csv("totals_sorted.csv").then(
 
     function drawGraph(NLAccessor, ALAccessor, yRange, line_id) {
       console.log("executed drawGraph")
-      //var nl_hits = d3.map(dataset, d => +d.NL_hits)
       var nl = d3.map(dataset, NLAccessor)
-      //var nl_max_x = d3.max(nl_x)
-      //console.log("nl_x", nl_x)
 
       var al = d3.map(dataset, ALAccessor)
-      //var al_max_x = d3.max(al_x)
-      //console.log("al_hits", al_x)
 
       var max = Math.max(d3.max(nl), d3.max(al))
-      //console.log("al_max_x", al_max_x)
-      //console.log("nl_max_x", nl_max_x)
-      //console.log("max_x", max_x)
 
       var yScale = d3.scaleLinear()
-        //.domain([0, d3.max(nl_hits)])
         .domain([0, max])
-        //.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
-        //.range([dimensions.boundedHeight,0])
-        //.range([dimensions.boundedHeight,2*dimensions.boundedHeight/3])
         .range(yRange)
       
-      //var NL = bounds.selectAll(".line")
       var NL = bounds.selectAll(line_id)
         .append("g")
         .attr("class", "line")
@@ -140,9 +128,7 @@ d3.csv("totals_sorted.csv").then(
           .y(d => yScale(NLAccessor(d))).curve(d3.curveLinear)
          )
 
-
       //AL = red
-      //var AL = bounds.selectAll(".line")
       var AL = bounds.selectAll(line_id)
         .append("g")
         .data([dataset])
@@ -183,82 +169,6 @@ d3.csv("totals_sorted.csv").then(
       .attr("dy", ".15em")
       .attr("transform", "rotate(-65)");
 
-
-
-
-    //var yScale = d3.scaleLinear()
-    //  //.domain([0, d3.max(nl_hits)])
-    //  .domain([0, max_x])
-    //  //.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
-    //  //.range([dimensions.boundedHeight,0])
-    //  .range([dimensions.boundedHeight,2*dimensions.boundedHeight/3])
-
-
-
-    //NL = blue
-    // select path - three types: curveBasis, curveStep, curveCardinal
-    //var NL = bounds.selectAll(".line")
-    //  .append("g")
-    //  .attr("class", "line")
-    //  .data([dataset])
-    //  .enter()
-    //  .append("path")
-    //  .attr("fill", "none")
-    //  .attr("stroke", NLColor)
-    //  .attr("stroke-width", 2)
-    //  .attr("d", d3.line()
-    //    .x((d,i) => {
-    //      return xScale(dates[i].date)
-    //    })
-    //    .y(d => yScale(xNLAccessor(d))).curve(d3.curveLinear)
-    //   )
-
-    //NL.selectAll("circle")
-    //  .append("g")
-    //  .data(dataset)
-    //  .enter()
-    //  .append("circle")
-    //  .attr("r", 1.5)
-    //  .attr("cx", d => xScale(+d.Year))
-    //  .attr("cy", d => yScale(xNLAccessor(d)))
-    //  .style("fill", "black")
-
-    //AL = red
-    //var AL = bounds.selectAll(".line")
-    //  .append("g")
-    //  .data([dataset])
-    //  .enter()
-    //  .append("path")
-    //  .attr("class", "line")//added this
-    //  .attr("fill", "none")
-    //  .attr("stroke", ALColor)
-    //  .attr("stroke-width", 2)
-    //  .attr("d", d3.line()
-    //    .x((d,i) => {
-    //      return xScale(dates[i].date)
-    //    })
-    //    .y(d => yScale(xALAccessor(d))).curve(d3.curveLinear)
-    //   )
-
-    //AL.selectAll("circle")
-    //  .append("g")
-    //  .data(dataset)
-    //  .enter()
-    //  .append("circle")
-    //  .attr("r", 1.5)
-    //  .attr("cx", d => xScale(+d.Year))
-    //  .attr("cy", d => yScale(xALAccessor(d)))
-    //  .style("fill", "black")
-
-    //var xAxis = d3.axisBottom(xScale)
-    //  .tickValues(xScale.domain().filter(function(d,i){ return !(i%4)})).tickSizeOuter(0)
-
-    //var yAxis = d3.axisLeft(yScale)
-
-    //var changing_axis = svg.append("g")
-    //  .attr("transform", "translate("+dimensions.margin.left+","+ dimensions.margin.top +")")
-    //  .call(yAxis)
-
     // NL Legend
     bounds.append("circle")
       .attr("cx", 30)
@@ -290,7 +200,6 @@ d3.csv("totals_sorted.csv").then(
       .text(ALTextLegend)
       .style("font-size", "15px")
       .attr("alignment-baseline","middle")
-
 
     // 1973 year line
     bounds.append("line")
@@ -348,37 +257,37 @@ d3.csv("totals_sorted.csv").then(
         .text(ALTextLegend)
     }
 
-    //ON CLICK
-    d3.select("#hrs").on("click", function() {
-      console.log("Hrs clicked")
-      xNLAccessor = d => +d.NL_hrs
-      xALAccessor = d => +d.AL_hrs
-      
-      NLTextLegend = "National League HRs"
-      ALTextLegend = "American League HRs"
+    ////ON CLICK
+    //d3.select("#hrs").on("click", function() {
+    //  console.log("Hrs clicked")
+    //  xNLAccessor = d => +d.NL_hrs
+    //  xALAccessor = d => +d.AL_hrs
+    //  
+    //  NLTextLegend = "National League HRs"
+    //  ALTextLegend = "American League HRs"
 
-      update()
-    })
+    //  update()
+    //})
 
-    d3.select("#hits").on("click", function() {
-      console.log("Hits clicked")
-      xNLAccessor = d => +d.NL_hits
-      xALAccessor = d => +d.AL_hits
+    //d3.select("#hits").on("click", function() {
+    //  console.log("Hits clicked")
+    //  xNLAccessor = d => +d.NL_hits
+    //  xALAccessor = d => +d.AL_hits
 
-      NLTextLegend = "National League Hits"
-      ALTextLegend = "American League Hits"
-      update()
-    })
+    //  NLTextLegend = "National League Hits"
+    //  ALTextLegend = "American League Hits"
+    //  update()
+    //})
 
-    d3.select("#runs").on("click", function() {
-      console.log("Runs clicked")
-      xNLAccessor = d => +d.NL_runs
-      xALAccessor = d => +d.AL_runs
+    //d3.select("#runs").on("click", function() {
+    //  console.log("Runs clicked")
+    //  xNLAccessor = d => +d.NL_runs
+    //  xALAccessor = d => +d.AL_runs
 
-      NLTextLegend = "National League Runs"
-      ALTextLegend = "American League Runs"
-      update()
-    })
+    //  NLTextLegend = "National League Runs"
+    //  ALTextLegend = "American League Runs"
+    //  update()
+    //})
 
      // APPEND CIRCLE MARKERS //
             //var gcircle = lines.selectAll("circle-group")
