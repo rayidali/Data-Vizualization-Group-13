@@ -46,11 +46,8 @@ d3.csv("totals_sorted.csv").then(
     console.log("dates", dates)
     //console.log("dates[0]", dates[0])
 
-
-
     var xNLAccessor = d => +d.NL_hits
     var xALAccessor = d => +d.AL_hits
-    
 
     //var years = d3.map(dataset, d => {
     //  console.log("d", d)
@@ -62,19 +59,6 @@ d3.csv("totals_sorted.csv").then(
     var years = d3.map(dataset, d => +d.Year)
     //console.log("years", years)
 
-    //var nl_hits = d3.map(dataset, d => +d.NL_hits)
-    var nl_x = d3.map(dataset, xNLAccessor)
-    var nl_max_x = d3.max(nl_x)
-    //console.log("nl_x", nl_x)
-
-    var al_x = d3.map(dataset, xALAccessor)
-    var al_max_x = d3.max(al_x)
-    //console.log("al_hits", al_x)
-
-    var max_x = Math.max(d3.max(nl_x), d3.max(al_x))
-    //console.log("al_max_x", al_max_x)
-    //console.log("nl_max_x", nl_max_x)
-    //console.log("max_x", max_x)
 
     //var xScale = d3.scaleBand()
     //  .domain(years)
@@ -90,12 +74,6 @@ d3.csv("totals_sorted.csv").then(
       //.domain(d3.extent(date, d => d.date))
       .range([0,dimensions.boundedWidth])//.padding(0.2)
 
-    var yScale = d3.scaleLinear()
-      //.domain([0, d3.max(nl_hits)])
-      .domain([0, max_x])
-      //.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
-      .range([dimensions.boundedHeight,0]);
-
     var svg = d3.select("#v1")
       .attr("width", dimensions.width)
       .attr("height", dimensions.height)
@@ -104,65 +82,91 @@ d3.csv("totals_sorted.csv").then(
     var bounds = svg.append("g")
       .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`)
 
+    var padding = 20
 
-    //NL = blue
-    // select path - three types: curveBasis, curveStep, curveCardinal
-    var NL = bounds.selectAll(".line")
-      .append("g")
-      .attr("class", "line")
-      .data([dataset])
-      .enter()
-      .append("path")
-      .attr("fill", "none")
-      .attr("stroke", NLColor)
-      .attr("stroke-width", 2)
-      .attr("d", d3.line()
-        .x((d,i) => {
-          return xScale(dates[i].date)
-        })
-        .y(d => yScale(xNLAccessor(d))).curve(d3.curveLinear)
-       )
+    var NLHrsAccessor = d => +d.NL_hrs
+    var ALHrsAccessor = d => +d.AL_hrs
+    var yHrsRange = [dimensions.boundedHeight,(2*dimensions.boundedHeight/3) - padding]
+    drawGraph(NLHrsAccessor, ALHrsAccessor, yHrsRange, ".line")
 
-    //NL.selectAll("circle")
-    //  .append("g")
-    //  .data(dataset)
-    //  .enter()
-    //  .append("circle")
-    //  .attr("r", 1.5)
-    //  .attr("cx", d => xScale(+d.Year))
-    //  .attr("cy", d => yScale(xNLAccessor(d)))
-    //  .style("fill", "black")
+    var NLHitsAccessor = d => +d.NL_hits
+    var ALHitsAccessor = d => +d.AL_hits
+    var yHitsRange = [(2*dimensions.boundedHeight/3) - padding,dimensions.boundedHeight/3]
+    drawGraph(NLHitsAccessor, ALHitsAccessor, yHitsRange, ".line2")
 
-    //AL = red
-    var AL = bounds.selectAll(".line")
-      .append("g")
-      .data([dataset])
-      .enter()
-      .append("path")
-      .attr("class", "line")//added this
-      .attr("fill", "none")
-      .attr("stroke", ALColor)
-      .attr("stroke-width", 2)
-      .attr("d", d3.line()
-        .x((d,i) => {
-          return xScale(dates[i].date)
-        })
-        .y(d => yScale(xALAccessor(d))).curve(d3.curveLinear)
-       )
+    var NLRunsAccessor = d => +d.NL_runs
+    var ALRunsAccessor = d => +d.AL_runs
+    var yRunsRange = [(dimensions.boundedHeight/3) - padding,0]
+    drawGraph(NLRunsAccessor, ALRunsAccessor, yRunsRange, ".line3")
 
-    //AL.selectAll("circle")
-    //  .append("g")
-    //  .data(dataset)
-    //  .enter()
-    //  .append("circle")
-    //  .attr("r", 1.5)
-    //  .attr("cx", d => xScale(+d.Year))
-    //  .attr("cy", d => yScale(xALAccessor(d)))
-    //  .style("fill", "black")
+    function drawGraph(NLAccessor, ALAccessor, yRange, line_id) {
+      console.log("executed drawGraph")
+      //var nl_hits = d3.map(dataset, d => +d.NL_hits)
+      var nl = d3.map(dataset, NLAccessor)
+      //var nl_max_x = d3.max(nl_x)
+      //console.log("nl_x", nl_x)
 
-    //var xAxis = d3.axisBottom(xScale)
-    //  .tickValues(xScale.domain().filter(function(d,i){ return !(i%4)})).tickSizeOuter(0)
+      var al = d3.map(dataset, ALAccessor)
+      //var al_max_x = d3.max(al_x)
+      //console.log("al_hits", al_x)
 
+      var max = Math.max(d3.max(nl), d3.max(al))
+      //console.log("al_max_x", al_max_x)
+      //console.log("nl_max_x", nl_max_x)
+      //console.log("max_x", max_x)
+
+      var yScale = d3.scaleLinear()
+        //.domain([0, d3.max(nl_hits)])
+        .domain([0, max])
+        //.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
+        //.range([dimensions.boundedHeight,0])
+        //.range([dimensions.boundedHeight,2*dimensions.boundedHeight/3])
+        .range(yRange)
+      
+      //var NL = bounds.selectAll(".line")
+      var NL = bounds.selectAll(line_id)
+        .append("g")
+        .attr("class", "line")
+        .data([dataset])
+        .enter()
+        .append("path")
+        .attr("fill", "none")
+        .attr("stroke", NLColor)
+        .attr("stroke-width", 2)
+        .attr("d", d3.line()
+          .x((d,i) => {
+            return xScale(dates[i].date)
+          })
+          .y(d => yScale(NLAccessor(d))).curve(d3.curveLinear)
+         )
+
+
+      //AL = red
+      //var AL = bounds.selectAll(".line")
+      var AL = bounds.selectAll(line_id)
+        .append("g")
+        .data([dataset])
+        .enter()
+        .append("path")
+        .attr("class", "line")//added this
+        .attr("fill", "none")
+        .attr("stroke", ALColor)
+        .attr("stroke-width", 2)
+        .attr("d", d3.line()
+          .x((d,i) => {
+            return xScale(dates[i].date)
+          })
+          .y(d => yScale(ALAccessor(d))).curve(d3.curveLinear)
+         )
+
+      var yAxis = d3.axisLeft(yScale)
+
+      var changing_axis = svg.append("g")
+        .attr("transform", "translate("+dimensions.margin.left+","+ dimensions.margin.top +")")
+        .call(yAxis)
+    }
+
+    
     var axisPad = 6 // axis formatting
 
     var xAxis = d3.axisBottom(xScale)
@@ -179,11 +183,81 @@ d3.csv("totals_sorted.csv").then(
       .attr("dy", ".15em")
       .attr("transform", "rotate(-65)");
 
-    var yAxis = d3.axisLeft(yScale)
 
-    var changing_axis = svg.append("g")
-      .attr("transform", "translate("+dimensions.margin.left+","+ dimensions.margin.top +")")
-      .call(yAxis)
+
+
+    //var yScale = d3.scaleLinear()
+    //  //.domain([0, d3.max(nl_hits)])
+    //  .domain([0, max_x])
+    //  //.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
+    //  //.range([dimensions.boundedHeight,0])
+    //  .range([dimensions.boundedHeight,2*dimensions.boundedHeight/3])
+
+
+
+    //NL = blue
+    // select path - three types: curveBasis, curveStep, curveCardinal
+    //var NL = bounds.selectAll(".line")
+    //  .append("g")
+    //  .attr("class", "line")
+    //  .data([dataset])
+    //  .enter()
+    //  .append("path")
+    //  .attr("fill", "none")
+    //  .attr("stroke", NLColor)
+    //  .attr("stroke-width", 2)
+    //  .attr("d", d3.line()
+    //    .x((d,i) => {
+    //      return xScale(dates[i].date)
+    //    })
+    //    .y(d => yScale(xNLAccessor(d))).curve(d3.curveLinear)
+    //   )
+
+    //NL.selectAll("circle")
+    //  .append("g")
+    //  .data(dataset)
+    //  .enter()
+    //  .append("circle")
+    //  .attr("r", 1.5)
+    //  .attr("cx", d => xScale(+d.Year))
+    //  .attr("cy", d => yScale(xNLAccessor(d)))
+    //  .style("fill", "black")
+
+    //AL = red
+    //var AL = bounds.selectAll(".line")
+    //  .append("g")
+    //  .data([dataset])
+    //  .enter()
+    //  .append("path")
+    //  .attr("class", "line")//added this
+    //  .attr("fill", "none")
+    //  .attr("stroke", ALColor)
+    //  .attr("stroke-width", 2)
+    //  .attr("d", d3.line()
+    //    .x((d,i) => {
+    //      return xScale(dates[i].date)
+    //    })
+    //    .y(d => yScale(xALAccessor(d))).curve(d3.curveLinear)
+    //   )
+
+    //AL.selectAll("circle")
+    //  .append("g")
+    //  .data(dataset)
+    //  .enter()
+    //  .append("circle")
+    //  .attr("r", 1.5)
+    //  .attr("cx", d => xScale(+d.Year))
+    //  .attr("cy", d => yScale(xALAccessor(d)))
+    //  .style("fill", "black")
+
+    //var xAxis = d3.axisBottom(xScale)
+    //  .tickValues(xScale.domain().filter(function(d,i){ return !(i%4)})).tickSizeOuter(0)
+
+    //var yAxis = d3.axisLeft(yScale)
+
+    //var changing_axis = svg.append("g")
+    //  .attr("transform", "translate("+dimensions.margin.left+","+ dimensions.margin.top +")")
+    //  .call(yAxis)
 
     // NL Legend
     bounds.append("circle")
@@ -306,16 +380,37 @@ d3.csv("totals_sorted.csv").then(
       update()
     })
 
+     // APPEND CIRCLE MARKERS //
+            //var gcircle = lines.selectAll("circle-group")
+            //.data(res_nested).enter()
+            //.append("g")
+            //.attr('class', 'circle-group')
 
-    // CREATE HOVER TOOLTIP WITH VERTICAL LINE
+          //gcircle.selectAll("circle")
+            //.data(d => d.values).enter()
+            //.append("g")
+            //.attr("class", "circle")  
+            //.append("circle")
+            //.attr("cx", d => xScale(d.date))
+            //.attr("cy", d => yScale(d.premium))
+            //.attr("r", 2)
+
+    // CREATE HOVER TOOLBOX WITH VERTICAL LINE
     var lineStroke = "2px"
+    var toolbox 
 
-    var tooltip = bounds.append("div")
-      .attr("id", "tooltip")
+      toolbox = bounds.append("div")
+      .attr("id", "toolbox")
       .style("position", "absolute")
-      .style("background-color", "#D3D3D3")
+      .style("width", "100px")
+      .style("height", "100px")
+      //.style("background-color", "#D3D3D3")
+      .style("background-color", "green")
+      //.style("left", "100px")
+      //.style("top", "100px")
       .style("padding", 6)
-      .style("display", "none")
+      //.style("display", "none")
+      .style("display", "block")
 
     var mouseG = bounds.append("g")
       .attr("class", "mouse-over-effects")
@@ -327,6 +422,9 @@ d3.csv("totals_sorted.csv").then(
       .style("stroke", "green")
       .style("stroke-width", lineStroke)
       .style("opacity", "0")
+      .on("mousemove", function() {
+        console.log("detected mousemove on mouseG")
+      })
     
     var lines = document.getElementsByClassName("line")
     var mousePerLine = mouseG.selectAll(".mouse-per-line")
@@ -337,7 +435,7 @@ d3.csv("totals_sorted.csv").then(
 
     mousePerLine.append("circle")
       .attr("r", 4)
-      .style("stroke", "black")
+      .style("stroke", "orange")
       .style("fill", "none")
       .style("stroke-width", lineStroke)
       .style("opacity", "0")
@@ -349,14 +447,14 @@ d3.csv("totals_sorted.csv").then(
       .attr("fill", "none")
       .attr("pointer-events", "all")
       .on("mouseout", function () { // on mouse out hide line, circles and text
-        console.log("Mouse out... should hide line. It does not work")
+        console.log("Mouse out... hiding")
         d3.select(".mouse-line")
           .style("opacity", "0");
         d3.selectAll(".mouse-per-line circle")
           .style("opacity", "0");
         d3.selectAll(".mouse-per-line text")
           .style("opacity", "0");
-        d3.selectAll("#tooltip")
+        d3.selectAll("#toolbox")
           .style("display", "none")
       })
       .on("mouseover", function () { // on mouse in show line, circles and text
@@ -365,12 +463,12 @@ d3.csv("totals_sorted.csv").then(
           .style("opacity", "1");
         d3.selectAll(".mouse-per-line circle")
           .style("opacity", "1");
-        d3.selectAll("#tooltip")
+        d3.selectAll("#toolbox")
           .style("display", "block")
       })
-      .on('mousemove', function (event, d) { // update tooltip content, line, circles and text when mouse moves
-        console.log("update tooltip content", event)
-        //console.log("updating tooltip content")
+      .on('mousemove', function (event, d) { // update toolbox content, line, circles and text when mouse moves
+        console.log("update toolbox content", event)
+        //console.log("updating toolbox content")
         //console.log("this", this) //this = current DOM element
         var mouse = d3.pointer(event) // Returns a two-element array of numbers [x, y] representing the coordinates of the specified event relative to the specified target.
         //console.log("mouse", mouse)
@@ -383,47 +481,94 @@ d3.csv("totals_sorted.csv").then(
             //var x = xScale(mouse[0])
             //console.log("x", x)
             var xDate = xScale.invert(mouse[0]) // use 'invert' to get date corresponding to distance from mouse position relative to svg
-            console.log("xDate", xDate)
+            //console.log("xDate", xDate)
 
-            console.log("d", d)
-            console.log("i", i)
-            console.log("d.values", d.values)
-            console.log("xDate", xDate)
-            console.log("getFullYear", xDate.getFullYear())
+            //console.log("d", d)
+            //console.log("i", i)
+            //console.log("d.values", d.values)
+            //console.log("xDate", xDate)
+            //console.log("getFullYear", xDate.getFullYear())
             var year = xDate.getFullYear()
 
             var bisect = d3.bisector(function (d) { 
-              console.log("getting here ===========>")
-              console.log("d in bisect = ", d)
+              //console.log("getting here ===========>")
+              //console.log("d in bisect = ", d)
               return d.Year; 
             }).left // retrieve row index of date on parsed csv
 
             var idx = bisect(d, year.toString());
-            console.log("idx", idx)
-            console.log("d[idx]", d[idx])
+            //console.log("idx", idx)
+            //console.log("d[idx]", d[idx])
+
+
+            var yScale = d3.scaleLinear()
+              //.domain([0, d3.max(nl_hits)])
+              //.domain([0, max_x])
+              .domain([0, dimensions.boundedHeight])
+              //.range([dimensions.height - dimensions.margin.bottom, dimensions.margin.top])
+              .range([dimensions.boundedHeight,0])
+              //.range([dimensions.boundedHeight,2*dimensions.boundedHeight/3])
+              //.range(yRange)
 
             d3.select(".mouse-line")
               .attr("d", function () {
 
                 var data = "M" + xScale(dates[idx].date) + "," + (dimensions.boundedHeight);
                 data += " " + xScale(dates[idx].date) + "," + 0;
-                console.log("data", data)
+                //console.log("data", data)
                 return data;
               });
             return "translate(" + xScale(+d[idx].Year) + "," + yScale(xALAccessor(d[idx])) + ")"
           });
 
-        //updateTooltipContent(mouse, res_nested)
-        //updateTooltipContent(mouse)
+        //updateToolBoxContent(mouse, res_nested)
+        updateToolBoxContent(mouse)
 
       }) 
-    function updateTooltipContent(mouse) {
-      console.log("in updateToolTipContent")
+    function updateToolBoxContent(mouse) {
+      console.log("in updateToolBoxContent")
       console.log("mouse", mouse)
 
+      var xDate = xScale.invert(mouse[0]) // use 'invert' to get date corresponding to distance from mouse position relative to svg
+      console.log("xDate", xDate)
+
+      var year = xDate.getFullYear()
+
+      var bisect = d3.bisector(function (d) { 
+        //console.log("getting here ===========>")
+        //console.log("d in bisect = ", d)
+        return d.Year; 
+      }).left // retrieve row index of date on parsed csv
+
+    var idx = bisect(dataset, year.toString()); //HERERERERERERERERE
+
+      var element = dataset[idx]
+      console.log("==> idx", idx)
+      console.log("==> element", element)
+
+      var coordinates = d3.pointer(event)
+
+      console.log("coordinates", coordinates)
+
+      //var page_x = d3.event.pageX + 20
+      //var page_y = d3.event.pageY - 20
+
+      //console.log("page_x",page_x)
+      //console.log("page_y",page_y) 
+
+      //toolbox.html("toolbox text")
+      toolbox.html("some text")
+        .style("display", "block")
+        .style('left', coordinates[0] + 20)
+        .style('top', coordinates[1] - 20)
+        .style('font-size', 11.5)
+        .text("please show :(")
+        //.selectAll()
+        //.data(dataset)
+        //  .enter()
+        //.append("div")
+        //.html("some other text")
     }
-
-
 
 
 
