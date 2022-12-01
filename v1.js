@@ -21,8 +21,8 @@ d3.csv("totals_sorted.csv").then(
     const NLColor = "#377eb8"
     const ALColor = "#e41a1c"
 
-    var NLTextLegend = "National League Hits"
-    var ALTextLegend = "American League Hits"
+    //var NLTextLegend = "National League Hits"
+    //var ALTextLegend = "American League Hits"
 
     dimensions.boundedWidth = dimensions.width - dimensions.margin.right - dimensions.margin.left
     dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom
@@ -87,26 +87,28 @@ d3.csv("totals_sorted.csv").then(
     var NLHrsAccessor = d => +d.NL_hrs
     var ALHrsAccessor = d => +d.AL_hrs
     var yHrsRange = [dimensions.boundedHeight,(2*dimensions.boundedHeight/3) + padding]
-    drawGraph(NLHrsAccessor, ALHrsAccessor, yHrsRange, ".line")
+    drawGraph(NLHrsAccessor, ALHrsAccessor, yHrsRange, ".line", "Home Runs")
 
     var NLHitsAccessor = d => +d.NL_hits
     var ALHitsAccessor = d => +d.AL_hits
     var yHitsRange = [(2*dimensions.boundedHeight/3), dimensions.boundedHeight/3]
-    //var yHitsRange = [(2*dimensions.boundedHeight/3) - padding,dimensions.boundedHeight/3]
-    drawGraph(NLHitsAccessor, ALHitsAccessor, yHitsRange, ".line2")
+    drawGraph(NLHitsAccessor, ALHitsAccessor, yHitsRange, ".line2", "Hits")
 
     var NLRunsAccessor = d => +d.NL_runs
     var ALRunsAccessor = d => +d.AL_runs
     var yRunsRange = [(dimensions.boundedHeight/3) - padding,0]
-    drawGraph(NLRunsAccessor, ALRunsAccessor, yRunsRange, ".line3")
+    drawGraph(NLRunsAccessor, ALRunsAccessor, yRunsRange, ".line3", "Runs")
 
-    function drawGraph(NLAccessor, ALAccessor, yRange, line_id) {
+    function drawGraph(NLAccessor, ALAccessor, yRange, line_id, title) {
       console.log("executed drawGraph")
       var nl = d3.map(dataset, NLAccessor)
 
       var al = d3.map(dataset, ALAccessor)
 
       var max = Math.max(d3.max(nl), d3.max(al))
+
+      var NLTextLegend = "National League " + title
+      var ALTextLegend = "American League " + title
 
       var yScale = d3.scaleLinear()
         .domain([0, max])
@@ -150,6 +152,39 @@ d3.csv("totals_sorted.csv").then(
       var changing_axis = svg.append("g")
         .attr("transform", "translate("+dimensions.margin.left+","+ dimensions.margin.top +")")
         .call(yAxis)
+
+      // NL Legend
+      bounds.append("circle")
+        .attr("cx", 30)
+        //.attr("cy", 20)
+        .attr("cy", yRange[1] + 20)
+        .attr("r", 6)
+        .style("fill", NLColor)
+
+      var NLLegend = bounds
+        .append("text")
+        .attr("id", "NLLegend")
+        .attr("x", 50)
+        .attr("y", yRange[1] + 20)
+        .text(NLTextLegend)
+        .style("font-size", "15px")
+        .attr("alignment-baseline","middle")
+
+      // AL Legend
+      bounds.append("circle")
+        .attr("cx", 30)
+        .attr("cy", yRange[1] + 40)
+        .attr("r", 6)
+        .style("fill", ALColor)
+
+      var ALLegend = bounds
+        .append("text")
+        .attr("id", "ALLegend")
+        .attr("x", 50)
+        .attr("y", yRange[1] + 40)
+        .text(ALTextLegend)
+        .style("font-size", "15px")
+        .attr("alignment-baseline","middle")
     }
 
     
@@ -169,37 +204,6 @@ d3.csv("totals_sorted.csv").then(
       .attr("dy", ".15em")
       .attr("transform", "rotate(-65)");
 
-    // NL Legend
-    bounds.append("circle")
-      .attr("cx", 30)
-      .attr("cy", 20)
-      .attr("r", 6)
-      .style("fill", NLColor)
-
-    var NLLegend = bounds
-      .append("text")
-      .attr("id", "NLLegend")
-      .attr("x", 50)
-      .attr("y", 20)
-      .text(NLTextLegend)
-      .style("font-size", "15px")
-      .attr("alignment-baseline","middle")
-
-    // AL Legend
-    bounds.append("circle")
-      .attr("cx", 30)
-      .attr("cy", 40)
-      .attr("r", 6)
-      .style("fill", ALColor)
-
-    var ALLegend = bounds
-      .append("text")
-      .attr("id", "ALLegend")
-      .attr("x", 50)
-      .attr("y", 40)
-      .text(ALTextLegend)
-      .style("font-size", "15px")
-      .attr("alignment-baseline","middle")
 
     // 1973 year line
     bounds.append("line")
