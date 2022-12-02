@@ -436,8 +436,10 @@ d3.csv("totals_sorted.csv").then(
         .style("font-size", "14px")
         .text(yearText)
         .append("div")
+        .style("color", NLColor)
         .text(NLRunsText)
         .append("div")
+        .style("color", ALColor)
         .text(ALRunsText)
 
         //.style("background-color", "red")
