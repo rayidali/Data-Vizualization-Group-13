@@ -189,7 +189,6 @@ d3.csv("totals_sorted.csv").then(
         .attr("alignment-baseline","middle")
     }
 
-    
     var axisPad = 6 // axis formatting
 
     var xAxis = d3.axisBottom(xScale)
@@ -205,7 +204,6 @@ d3.csv("totals_sorted.csv").then(
       .attr("dx", "-.8em")
       .attr("dy", ".15em")
       .attr("transform", "rotate(-65)");
-
 
     // 1973 year line
     bounds.append("line")
@@ -265,15 +263,27 @@ d3.csv("totals_sorted.csv").then(
 
     // CREATE HOVER TOOLBOX WITH VERTICAL LINE
     var lineStroke = "2px"
-    var toolbox 
 
-      //toolbox = svg.append("div")
-      toolbox = d3.select("#chart").append("div")
-      .attr("id", "toolbox")
-      .style("position", "absolute")
-      .style("background-color", "#D3D3D3")
-      .style("padding", 6)
-      .style("display", "none")
+    //function createToolBox(id) {
+    //  //toolbox = svg.append("div")
+    //  toolbox = d3.select("#chart").append("div")
+    //  //.attr("id", "toolbox")
+    //  .style("position", "absolute")
+    //  .style("background-color", "#D3D3D3")
+    //  .style("padding", 6)
+    //  .style("display", "none")
+
+    //  return toolbox
+    //}
+    //var toolbox = createToolBox("toolbox")
+
+    //toolbox = svg.append("div")
+    var toolbox = d3.select("#chart").append("div")
+    .attr("id", "toolbox")
+    .style("position", "absolute")
+    .style("background-color", "#D3D3D3")
+    .style("padding", 6)
+    .style("display", "none")
 
     var mouseG = bounds.append("g")
       .attr("class", "mouse-over-effects")
@@ -296,6 +306,7 @@ d3.csv("totals_sorted.csv").then(
       .append("g")
       .attr("class", "mouse-per-line")
 
+    //TODO: This needs to be fixed
     mousePerLine.append("circle")
       .attr("r", 4)
       .style("stroke", "orange")
@@ -386,7 +397,7 @@ d3.csv("totals_sorted.csv").then(
 
         //updateToolBoxContent(mouse, res_nested)
         updateToolBoxContent(mouse)
-
+      
       }) 
     function updateToolBoxContent(mouse) {
       console.log("in updateToolBoxContent")
@@ -415,24 +426,29 @@ d3.csv("totals_sorted.csv").then(
       console.log("coordinates", coordinates)
 
       //var text_coord = "x="+ coordinates[0] + " y=" + coordinates[1]
-      var x = coordinates[0]+ 400
-      var y = coordinates[1]+ 265
+      var x = coordinates[0] + 330
+      var y = coordinates[1] + 265
+
       var yearText = element.Year 
       var NLRunsText = "National League Runs: "+ element.NL_runs 
       var ALRunsText = "American League Runs: "+ element.AL_runs
 
-      var hitsText = "National League Hits: "+ element.NL_runs + "\n"
+      var NLHitsText = "National League Hits: "+ element.NL_hits
+      var ALHitsText = "American League Hits: "+ element.AL_hits
 
-      //console.log("page_x",page_x)
-      //console.log("page_y",page_y) 
+      var NLRunsText = "National League Runs: "+ element.NL_runs
+      var ALRunsText = "American League Runs: "+ element.AL_runs
+
+      console.log("x",x)
+      console.log("y",y) 
 
       //toolbox.html("toolbox text")
       //toolbox.html("some text")
       //d3.selectAll("#toolbox")
-      toolbox
+      toolbox  
         .style("display", "block")
-        .style("left", x +"px")
-        .style("top", y +"px")
+        .style("left", x + "px")
+        .style("top", y + "px")
         .style("font-size", "14px")
         .text(yearText)
         .append("div")
@@ -441,21 +457,19 @@ d3.csv("totals_sorted.csv").then(
         .append("div")
         .style("color", ALColor)
         .text(ALRunsText)
+        .append("div")
+        .style("color", NLColor)
+        .text(NLHitsText)
+        .append("div")
+        .style("color", ALColor)
+        .text(ALHitsText)
+        .append("div")
+        .style("color", NLColor)
+        .text(NLRunsText)
+        .append("div")
+        .style("color", ALColor)
+        .text(ALRunsText)
 
-        //.style("background-color", "red")
-        //.style('left', 50)
-        //.style('top', 50)
-        //.selectAll()
-        //.data(dataset)
-        //  .enter()
-        //.append("div")
-        //.html("some other text")
-      //
-      //I think its not showing because of relative/absolute (toolbos is child of who), coordinates
-      //-> absolute, x, y 
     }
-
-
-
   }
 )
