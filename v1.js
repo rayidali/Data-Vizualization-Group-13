@@ -21,9 +21,6 @@ d3.csv("totals_sorted.csv").then(
     const NLColor = "#377eb8"
     const ALColor = "#e41a1c"
 
-    //var NLTextLegend = "National League Hits"
-    //var ALTextLegend = "American League Hits"
-
     dimensions.boundedWidth = dimensions.width - dimensions.margin.right - dimensions.margin.left
     dimensions.boundedHeight = dimensions.height - dimensions.margin.top - dimensions.margin.bottom
 
@@ -74,10 +71,15 @@ d3.csv("totals_sorted.csv").then(
       //.domain(d3.extent(date, d => d.date))
       .range([0,dimensions.boundedWidth])//.padding(0.2)
 
-    var svg = d3.select("#v1")
+    var svg = d3.select("#chart").append("svg")
+      .attr("id", "v1")
       .attr("width", dimensions.width)
       .attr("height", dimensions.height)
-      //.style("background-color", "green")
+
+    //var svg = d3.select("#v1")
+    //  .attr("width", dimensions.width)
+    //  .attr("height", dimensions.height)
+    //  //.style("background-color", "green")
 
     var bounds = svg.append("g")
       .style("transform", `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`)
@@ -191,7 +193,7 @@ d3.csv("totals_sorted.csv").then(
     var axisPad = 6 // axis formatting
 
     var xAxis = d3.axisBottom(xScale)
-      .ticks(d3.timeYear.every(4))
+      .ticks(d3.timeYear.every(2))
       .tickSizeOuter(axisPad*2)
       .tickSizeInner(axisPad*2)
 
@@ -261,69 +263,17 @@ d3.csv("totals_sorted.csv").then(
         .text(ALTextLegend)
     }
 
-    ////ON CLICK
-    //d3.select("#hrs").on("click", function() {
-    //  console.log("Hrs clicked")
-    //  xNLAccessor = d => +d.NL_hrs
-    //  xALAccessor = d => +d.AL_hrs
-    //  
-    //  NLTextLegend = "National League HRs"
-    //  ALTextLegend = "American League HRs"
-
-    //  update()
-    //})
-
-    //d3.select("#hits").on("click", function() {
-    //  console.log("Hits clicked")
-    //  xNLAccessor = d => +d.NL_hits
-    //  xALAccessor = d => +d.AL_hits
-
-    //  NLTextLegend = "National League Hits"
-    //  ALTextLegend = "American League Hits"
-    //  update()
-    //})
-
-    //d3.select("#runs").on("click", function() {
-    //  console.log("Runs clicked")
-    //  xNLAccessor = d => +d.NL_runs
-    //  xALAccessor = d => +d.AL_runs
-
-    //  NLTextLegend = "National League Runs"
-    //  ALTextLegend = "American League Runs"
-    //  update()
-    //})
-
-     // APPEND CIRCLE MARKERS //
-            //var gcircle = lines.selectAll("circle-group")
-            //.data(res_nested).enter()
-            //.append("g")
-            //.attr('class', 'circle-group')
-
-          //gcircle.selectAll("circle")
-            //.data(d => d.values).enter()
-            //.append("g")
-            //.attr("class", "circle")  
-            //.append("circle")
-            //.attr("cx", d => xScale(d.date))
-            //.attr("cy", d => yScale(d.premium))
-            //.attr("r", 2)
-
     // CREATE HOVER TOOLBOX WITH VERTICAL LINE
     var lineStroke = "2px"
     var toolbox 
 
-      toolbox = bounds.append("div")
+      //toolbox = svg.append("div")
+      toolbox = d3.select("#chart").append("div")
       .attr("id", "toolbox")
       .style("position", "absolute")
-      .style("width", "100px")
-      .style("height", "100px")
-      //.style("background-color", "#D3D3D3")
-      .style("background-color", "green")
-      //.style("left", "100px")
-      //.style("top", "100px")
+      .style("background-color", "#D3D3D3")
       .style("padding", 6)
-      //.style("display", "none")
-      .style("display", "block")
+      .style("display", "none")
 
     var mouseG = bounds.append("g")
       .attr("class", "mouse-over-effects")
@@ -440,7 +390,7 @@ d3.csv("totals_sorted.csv").then(
       }) 
     function updateToolBoxContent(mouse) {
       console.log("in updateToolBoxContent")
-      console.log("mouse", mouse)
+      //console.log("mouse", mouse)
 
       var xDate = xScale.invert(mouse[0]) // use 'invert' to get date corresponding to distance from mouse position relative to svg
       console.log("xDate", xDate)
@@ -461,26 +411,46 @@ d3.csv("totals_sorted.csv").then(
 
       var coordinates = d3.pointer(event)
 
+      console.log("Still need to update rect accroding to coordinates:")
       console.log("coordinates", coordinates)
 
-      //var page_x = d3.event.pageX + 20
-      //var page_y = d3.event.pageY - 20
+      //var text_coord = "x="+ coordinates[0] + " y=" + coordinates[1]
+      var x = coordinates[0]+ 400
+      var y = coordinates[1]+ 265
+      var yearText = element.Year 
+      var NLRunsText = "National League Runs: "+ element.NL_runs 
+      var ALRunsText = "American League Runs: "+ element.AL_runs
+
+      var hitsText = "National League Hits: "+ element.NL_runs + "\n"
 
       //console.log("page_x",page_x)
       //console.log("page_y",page_y) 
 
       //toolbox.html("toolbox text")
-      toolbox.html("some text")
+      //toolbox.html("some text")
+      //d3.selectAll("#toolbox")
+      toolbox
         .style("display", "block")
-        .style('left', coordinates[0] + 20)
-        .style('top', coordinates[1] - 20)
-        .style('font-size', 11.5)
-        .text("please show :(")
+        .style("left", x +"px")
+        .style("top", y +"px")
+        .style("font-size", "14px")
+        .text(yearText)
+        .append("div")
+        .text(NLRunsText)
+        .append("div")
+        .text(ALRunsText)
+
+        //.style("background-color", "red")
+        //.style('left', 50)
+        //.style('top', 50)
         //.selectAll()
         //.data(dataset)
         //  .enter()
         //.append("div")
         //.html("some other text")
+      //
+      //I think its not showing because of relative/absolute (toolbos is child of who), coordinates
+      //-> absolute, x, y 
     }
 
 
